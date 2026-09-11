@@ -4,7 +4,6 @@ import {
   Bell,
   ChevronDown,
   LogOut,
-  User,
   ShieldAlert,
   Clock
 } from 'lucide-react';
@@ -24,8 +23,9 @@ export default function TopNavbar({ onToggleSidebar, user, onLogout }) {
         {/* Toggle Sidebar Button */}
         <button
           onClick={onToggleSidebar}
-          className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer lg:hidden shrink-0"
-          title="Toggle Navigation Menu"
+          className="p-2.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all duration-200 cursor-pointer shrink-0 active:scale-95"
+          title="Toggle Sidebar (Mini / Expanded)"
+          aria-label="Toggle Navigation Sidebar"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -54,7 +54,7 @@ export default function TopNavbar({ onToggleSidebar, user, onLogout }) {
             <Bell className="w-5 h-5 text-slate-700" />
             {/* Notification Badge - Positioned at corner without covering bell */}
             <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center ring-2 ring-white shadow-xs">
-              3
+              2
             </span>
           </button>
 
@@ -63,7 +63,7 @@ export default function TopNavbar({ onToggleSidebar, user, onLogout }) {
             <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <span className="font-bold text-sm text-slate-900">Security Alerts</span>
-                <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/60">3 New</span>
+                <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/60">2 New</span>
               </div>
               <div className="space-y-3 mt-3">
                 <div className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
@@ -122,17 +122,9 @@ export default function TopNavbar({ onToggleSidebar, user, onLogout }) {
                 <p className="font-bold text-xs text-slate-900">{username}</p>
                 <p className="text-[11.5px] text-slate-600 font-medium">Store Manager</p>
               </div>
-              <button
-                onClick={() => setProfileOpen(false)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer"
-              >
-                <User className="w-4 h-4 text-slate-600" />
-                <span>My Profile</span>
-              </button>
               {onLogout && (
                 <button
                   onClick={() => {
-                    setProfileOpen(false);
                     onLogout();
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
