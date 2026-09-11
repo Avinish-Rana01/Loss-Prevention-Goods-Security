@@ -1,24 +1,44 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
 
-const Login = () => {
+const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [notification, setNotification] = useState(null);
+    const [errors, setErrors] = useState({ username: false, password: false });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!username || !password) {
-            showToast('Please enter both username and password', 'error');
+        
+        const isUsernameEmpty = !username.trim();
+        const isPasswordEmpty = !password;
+
+        if (isUsernameEmpty || isPasswordEmpty) {
+            setErrors({
+                username: isUsernameEmpty,
+                password: isPasswordEmpty
+            });
+
+            if (isUsernameEmpty && isPasswordEmpty) {
+                showToast('Please enter both username and password', 'error');
+            } else if (isUsernameEmpty) {
+                showToast('Please enter your username', 'error');
+            } else {
+                showToast('Please enter your password', 'error');
+            }
             return;
         }
 
+        setErrors({ username: false, password: false });
         setIsLoading(true);
         setTimeout(() => {
             setIsLoading(false);
             showToast(`Welcome back! Successfully signed in as ${username}`, 'success');
+            if (onLogin) {
+                setTimeout(() => onLogin({ username }), 500);
+            }
         }, 1000);
     };
 
@@ -83,13 +103,22 @@ const Login = () => {
                             <div className="relative">
                                 <input
                                     type="text"
-                                    required
                                     value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    onChange={(e) => {
+                                        setUsername(e.target.value);
+                                        if (errors.username) setErrors(prev => ({ ...prev, username: false }));
+                                    }}
                                     placeholder="Enter Your Username Here.."
-                                    className="w-full px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-gray-800 placeholder-[#9ca3af] bg-white border border-[#e2e8f0] rounded-xl outline-none transition-all duration-200 focus:border-[#00a8e7] focus:ring-4 focus:ring-[#00a8e7]/10 shadow-xs"
+                                    className={`w-full px-4 py-3 sm:py-3.5 text-xs sm:text-sm text-gray-800 placeholder-[#9ca3af] bg-white rounded-xl outline-none transition-all duration-200 shadow-xs ${
+                                        errors.username
+                                            ? 'border-2 border-rose-500 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/15'
+                                            : 'border border-[#e2e8f0] focus:border-[#00a8e7] focus:ring-4 focus:ring-[#00a8e7]/10'
+                                    }`}
                                 />
                             </div>
+                            {errors.username && (
+                                <p className="mt-1 text-xs text-rose-500 font-medium">Username is required</p>
+                            )}
                         </div>
 
                         {/* Password Field */}
@@ -100,11 +129,17 @@ const Login = () => {
                             <div className="relative flex items-center">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
-                                    required
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        if (errors.password) setErrors(prev => ({ ...prev, password: false }));
+                                    }}
                                     placeholder="Enter Your Password"
-                                    className="w-full px-4 py-3 sm:py-3.5 pr-11 text-xs sm:text-sm text-gray-800 placeholder-[#9ca3af] bg-white border border-[#e2e8f0] rounded-xl outline-none transition-all duration-200 focus:border-[#00a8e7] focus:ring-4 focus:ring-[#00a8e7]/10 shadow-xs"
+                                    className={`w-full px-4 py-3 sm:py-3.5 pr-11 text-xs sm:text-sm text-gray-800 placeholder-[#9ca3af] bg-white rounded-xl outline-none transition-all duration-200 shadow-xs ${
+                                        errors.password
+                                            ? 'border-2 border-rose-500 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/15'
+                                            : 'border border-[#e2e8f0] focus:border-[#00a8e7] focus:ring-4 focus:ring-[#00a8e7]/10'
+                                    }`}
                                 />
                                 <button
                                     type="button"
@@ -119,6 +154,9 @@ const Login = () => {
                                     )}
                                 </button>
                             </div>
+                            {errors.password && (
+                                <p className="mt-1 text-xs text-rose-500 font-medium">Password is required</p>
+                            )}
                         </div>
 
                         {/* Forgot Password Link */}
