@@ -65,7 +65,7 @@ const Login = () => {
                     {/* Header */}
                     <div className="mb-7">
                         <h1 className="text-2xl sm:text-[32px] font-extrabold text-[#111827] tracking-tight flex items-center gap-2">
-                            <span>Welcom Back !</span>
+                            <span>Welcome Back !</span>
                             <span className="inline-block animate-bounce origin-bottom-right" style={{ animationDuration: '2s' }}>👋</span>
                         </h1>
                         <p className="mt-2 text-[#6b7280] text-xs sm:text-[14px] leading-relaxed font-normal">
