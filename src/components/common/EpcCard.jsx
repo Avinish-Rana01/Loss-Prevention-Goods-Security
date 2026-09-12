@@ -8,6 +8,8 @@ export default function EpcCard({
   articleNumber,
   epc,
   epcData,
+  amount,
+  price,
   date,
   time,
   variant = 'untagged',
@@ -19,6 +21,13 @@ export default function EpcCard({
   const artNo = articleNo || articleNumber || 'N/A';
   const epcVal = epc || epcData || 'N/A';
   const isTheft = variant === 'theft';
+  const rawAmount = amount !== undefined ? amount : price;
+  const formattedAmount =
+    rawAmount !== undefined && rawAmount !== null
+      ? typeof rawAmount === 'number'
+        ? rawAmount.toLocaleString('en-IN')
+        : rawAmount.toString()
+      : null;
 
   // 1. Shimmer Skeleton Loading State (Compact with thin left border)
   if (loading) {
@@ -39,8 +48,11 @@ export default function EpcCard({
           <div className="h-4 w-20 bg-slate-200/60 rounded-full" />
         </div>
         <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="h-3 w-24 bg-slate-200/60 rounded" />
-          <div className="h-3 w-28 bg-slate-200/50 rounded" />
+          <div className="flex items-center gap-1.5">
+            <div className="h-3 w-20 bg-slate-200/60 rounded" />
+            <div className="h-3 w-24 bg-slate-200/50 rounded" />
+          </div>
+          <div className="h-3 w-16 bg-slate-200/60 rounded" />
         </div>
         <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-100">
           <div className="h-3 w-20 bg-slate-200/60 rounded" />
@@ -81,20 +93,35 @@ export default function EpcCard({
         </span>
       </div>
 
-      {/* Row 2: Article No and EPC chip */}
-      <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs">
-        {/* Article No */}
-        <span className="inline-flex items-center bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-[10.5px] font-medium">
-          Article No: <strong className="text-slate-900 font-semibold ml-1">{artNo}</strong>
-        </span>
-
-        {/* EPC Monospace Chip */}
-        <div className="inline-flex items-center gap-1 bg-slate-50 border border-slate-200/80 px-1.5 py-0.5 rounded">
-          <span className="text-[9.5px] font-bold uppercase text-slate-500">EPC:</span>
-          <span className="font-mono text-[10.5px] font-semibold text-slate-800 tracking-tight truncate max-w-[160px] sm:max-w-[240px]">
-            {epcVal}
+      {/* Row 2: Article No & EPC on left, Amount on right */}
+      <div className="flex flex-wrap items-center justify-between gap-1.5 mt-1.5 text-xs">
+        {/* Left Group: Article No & EPC */}
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+          {/* Article No */}
+          <span className="inline-flex items-center bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-[10.5px] font-medium shrink-0">
+            Article No: <strong className="text-slate-900 font-semibold ml-1">{artNo}</strong>
           </span>
+
+          {/* EPC Monospace Chip */}
+          <div className="inline-flex items-center gap-1 bg-slate-50 border border-slate-200/80 px-1.5 py-0.5 rounded shrink-0">
+            <span className="text-[9.5px] font-bold uppercase text-slate-500">EPC:</span>
+            <span className="font-mono text-[10.5px] font-semibold text-slate-800 tracking-tight truncate max-w-[130px] sm:max-w-[180px]">
+              {epcVal}
+            </span>
+          </div>
         </div>
+
+        {/* Right Group: Amount aligned to the right */}
+        {formattedAmount && (
+          <span className="inline-flex items-center bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-[10.5px] font-medium ml-auto shrink-0">
+            Amount:{' '}
+            <strong className="text-slate-900 font-bold ml-1">
+              {formattedAmount.startsWith('₹') || formattedAmount.toLowerCase().startsWith('rs')
+                ? formattedAmount
+                : `₹${formattedAmount}`}
+            </strong>
+          </span>
+        )}
       </div>
 
       {/* Row 3: Date on Left, Time on Right with Clock icon (Darker Text) */}

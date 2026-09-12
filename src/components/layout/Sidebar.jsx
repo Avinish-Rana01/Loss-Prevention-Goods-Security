@@ -8,7 +8,7 @@ import {
   X
 } from 'lucide-react';
 
-export default function Sidebar({ isOpen, onClose, isCollapsed = false }) {
+export default function Sidebar({ isOpen, onClose, isCollapsed = true }) {
   const handleNavClick = () => {
     if (window.innerWidth < 1024 && onClose) {
       onClose();

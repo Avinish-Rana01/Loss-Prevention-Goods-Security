@@ -26,7 +26,7 @@ const DashboardOverview = () => {
       </PageHeader>
 
       {/* 1. Compact Top Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Tags"
           count="100"
@@ -100,6 +100,7 @@ const DashboardOverview = () => {
                 articleDescription={item.articleDescription}
                 articleNo={item.articleNo}
                 epc={item.epc}
+                amount={item.amount}
                 date={item.date}
                 time={item.time}
                 status={item.status}
@@ -154,6 +155,7 @@ const DashboardOverview = () => {
                 articleDescription={item.articleDescription}
                 articleNo={item.articleNo}
                 epc={item.epc}
+                amount={item.amount}
                 date={item.date}
                 time={item.time}
                 status={item.status}
