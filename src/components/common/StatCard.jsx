@@ -128,7 +128,7 @@ export default function StatCard({
   // 2. Active Card State with Ambient Shimmer / Hover Sheen
   return (
     <div
-      className={`group relative w-full rounded-2xl p-3.5 sm:p-4 overflow-hidden flex flex-col justify-center min-h-[82px] sm:min-h-[88px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${currentTheme.cardBg} ${currentTheme.shadow} ${className}`}
+      className={`group relative w-full rounded-2xl p-3.5 sm:p-4 overflow-hidden flex flex-col justify-center min-h-[82px] sm:min-h-[88px] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer ${currentTheme.cardBg} ${currentTheme.shadow} ${className}`}
     >
       {/* Continuous Ambient Shimmer or Hover Sheen Sweep */}
       {shimmer ? (

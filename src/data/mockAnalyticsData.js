@@ -158,3 +158,41 @@ export const TOP_STOLEN_ITEMS_DATA = [
     barClass: 'bg-rose-500',
   },
 ];
+
+export const THEFT_BY_TIME_DATA = [
+  { timeSlot: '6AM - 9AM', count: 12, label: 'Early Morning' },
+  { timeSlot: '9AM - 12PM', count: 18, label: 'Late Morning' },
+  { timeSlot: '12PM - 3PM', count: 25, label: 'Afternoon Peak' },
+  { timeSlot: '3PM - 6PM', count: 20, label: 'Late Afternoon' },
+  { timeSlot: '6PM - 9PM', count: 15, label: 'Evening' },
+  { timeSlot: '9PM - 12AM', count: 8, label: 'Night / Closing' },
+];
+
+export const THEFT_BY_TIME_SUMMARY = {
+  totalIncidents: 98,
+  peakSlot: '12PM - 3PM',
+  peakCount: 25,
+  peakPercentage: 25.5,
+  rushWindowPercentage: 45.9, // (25 + 20) / 98
+};
+
+export const THEFT_BY_DAY_OF_WEEK_DATA = [
+  { day: 'Mon', fullDay: 'Monday', count: 22 },
+  { day: 'Tue', fullDay: 'Tuesday', count: 18 },
+  { day: 'Wed', fullDay: 'Wednesday', count: 35 },
+  { day: 'Thu', fullDay: 'Thursday', count: 27 },
+  { day: 'Fri', fullDay: 'Friday', count: 30 },
+  { day: 'Sat', fullDay: 'Saturday', count: 25 },
+  { day: 'Sun', fullDay: 'Sunday', count: 20 },
+];
+
+export const THEFT_BY_DAY_OF_WEEK_SUMMARY = {
+  totalIncidents: 177,
+  peakDay: 'Wednesday',
+  peakDayShort: 'Wed',
+  peakCount: 35,
+  peakPercentage: 19.8,
+  weekdayTotal: 132,
+  weekendTotal: 45,
+  midweekRushPercentage: 52.0, // Wed (35) + Thu (27) + Fri (30) = 92 / 177
+};

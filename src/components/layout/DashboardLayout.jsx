@@ -6,7 +6,7 @@ import Footer from './Footer';
 
 
 const DashboardLayout = ({ user, onLogout, children }) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const handleToggleSidebar = () => {

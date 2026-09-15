@@ -240,6 +240,7 @@
 /* Custom subtle scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
+  height: 5px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
@@ -250,6 +251,103 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Firefox scrollbar support */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Ensure hand cursor (cursor: pointer) across all interactive components */
+button,
+[role="button"],
+[role="option"],
+[role="tab"],
+a,
+select,
+summary,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* PRINT & SAVE TO PDF OPTIMIZATIONS                                          */
+/* Print ONLY the report table with clean layout, hiding the rest of the page */
+/* -------------------------------------------------------------------------- */
+@media print {
+  /* Hide application shell elements */
+  nav,
+  aside,
+  header,
+  footer,
+  button,
+  input,
+  select,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide everything on page by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Make printable area and all its children visible */
+  #printable-report-area,
+  #printable-report-area * {
+    visibility: visible !important;
+  }
+
+  #printable-report-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Ensure table prints crisp borders and repeatable headers */
+  #printable-report-area table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 9pt !important;
+  }
+
+  #printable-report-area th,
+  #printable-report-area td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 6px 8px !important;
+    color: #0f172a !important;
+  }
+
+  #printable-report-area th {
+    background-color: #f1f5f9 !important;
+    font-weight: 700 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #printable-report-area tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
 }
 
 

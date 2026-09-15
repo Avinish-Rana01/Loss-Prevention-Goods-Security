@@ -81,13 +81,13 @@ const DashboardOverview = () => {
             </div>
 
             {/* Count Badge on Right Side */}
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-[#006e96] border border-sky-200 shrink-0 shadow-2xs">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-[#006e96] border border-sky-200 shrink-0 shadow-2xs cursor-pointer">
               30 Items
             </span>
           </div>
 
           {/* Sub-bar / Context Helper */}
-          <div className="px-4 py-1.5 bg-sky-50/40 border-b border-sky-100/70 flex items-center justify-between text-[11px] text-slate-500 h-8 shrink-0">
+          <div className="px-4 py-1.5 bg-sky-50/40 border-b border-sky-100/70 flex items-center justify-between text-[11px] text-slate-500 h-8 shrink-0 cursor-pointer">
             <span className="truncate mr-2">Articles sold or billed where security tag was not detached</span>
             <span className="font-semibold text-sky-700 shrink-0">Action: Detach Tag</span>
           </div>
@@ -132,7 +132,7 @@ const DashboardOverview = () => {
             </div>
 
             {/* Count Badge on Right Side with Live Pulsing Dot */}
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1.5 shrink-0 shadow-2xs">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1.5 shrink-0 shadow-2xs cursor-pointer">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
@@ -142,7 +142,7 @@ const DashboardOverview = () => {
           </div>
 
           {/* Sub-bar / Context Helper */}
-          <div className="px-4 py-1.5 bg-rose-50/40 border-b border-rose-100/70 flex items-center justify-between text-[11px] text-slate-500 h-8 shrink-0">
+          <div className="px-4 py-1.5 bg-rose-50/40 border-b border-rose-100/70 flex items-center justify-between text-[11px] text-slate-500 h-8 shrink-0 cursor-pointer">
             <span className="truncate mr-2">Unauthorized articles passed through exit boundary scanners</span>
             <span className="font-semibold text-rose-600 shrink-0">Action: Security Check</span>
           </div>

@@ -420,7 +420,7 @@ export default function TagStatusDistributionChart({
       </div>
 
       {/* 3. Bottom Context Sub-bar: Potential Loss shown ONLY here */}
-      <div className="px-3.5 py-1.5 bg-emerald-50/40 border-t border-emerald-100/70 flex items-center justify-between text-[10.5px] text-slate-600 h-7 shrink-0">
+      <div className="px-3.5 py-1.5 bg-emerald-50/40 border-t border-emerald-100/70 flex items-center justify-between text-[10.5px] text-slate-600 h-7 shrink-0 cursor-pointer">
         <span className="truncate mr-2">
           Total Tags: <strong className="text-emerald-700 font-bold">{STATCARD_METRICS.totalTags.toLocaleString('en-IN')}</strong> (95.3% Safe)
         </span>

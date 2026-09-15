@@ -1,0 +1,313 @@
+import React, { useState } from 'react';
+import { Clock, ArrowRight, X, AlertTriangle } from 'lucide-react';
+import { THEFT_BY_TIME_DATA, THEFT_BY_TIME_SUMMARY } from '../../data/mockAnalyticsData';
+
+
+export default function TheftByTimeOfDay({
+  data = THEFT_BY_TIME_DATA,
+  summary = THEFT_BY_TIME_SUMMARY,
+  className = '',
+}) {
+  const [activeSlot, setActiveSlot] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  // SVG Chart Geometry Constants
+  const viewBoxWidth = 520;
+  const viewBoxHeight = 225;
+  const chartLeft = 46;
+  const chartRight = 504;
+  const chartTop = 32;
+  const chartBottom = 175;
+  const chartHeight = chartBottom - chartTop; // 143px
+  const maxVal = 30;
+
+  // Y-axis grid levels (0, 10, 20, 30)
+  const yTicks = [0, 10, 20, 30];
+  const getY = (val) => chartBottom - (val / maxVal) * chartHeight;
+
+  // X-axis bar positions
+  const plotWidth = chartRight - chartLeft;
+  const slotWidth = plotWidth / data.length;
+  const barWidth = 46;
+
+  return (
+    <div
+      className={`bg-white border-2 border-rose-200/80 rounded-2xl overflow-hidden shadow-xs flex flex-col transition-all hover:shadow-sm ${className}`}
+    >
+      {/* 1. Header Banner matching reference with View Details link */}
+      <div className="bg-gradient-to-r from-rose-50 via-rose-50/50 to-white px-3.5 py-2.5 border-b border-rose-100 flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-xs shadow-rose-500/25 shrink-0">
+            <Clock className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 block leading-none mb-0.5">
+              Hourly Incidents
+            </span>
+            <h3 className="text-xs sm:text-[13px] font-bold text-slate-900 tracking-tight truncate leading-tight">
+              Theft by Time of Day
+            </h3>
+          </div>
+        </div>
+
+        {/* View Details Link */}
+        <button
+          type="button"
+          onClick={() => setShowDetailsModal(true)}
+          className="text-xs font-bold text-[#00a8e7] hover:text-sky-600 transition-colors flex items-center gap-1 shrink-0 py-1 px-2 rounded-lg hover:bg-sky-50 cursor-pointer"
+        >
+          <span>View Details</span>
+          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+        </button>
+      </div>
+
+      {/* 2. Main Bar Chart Area */}
+      <div className="p-3 sm:p-4 bg-slate-50/15 flex-1 relative flex flex-col justify-center">
+        <div className="w-full relative">
+          <svg
+            viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+            className="w-full h-auto select-none"
+            style={{ maxHeight: '220px' }}
+          >
+            <defs>
+              {/* Subtle top-to-bottom bar gradient */}
+              <linearGradient id="roseBarGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f43f5e" />
+                <stop offset="100%" stopColor="#e11d48" />
+              </linearGradient>
+
+              {/* Hover highlight gradient */}
+              <linearGradient id="roseBarHover" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#fb7185" />
+                <stop offset="100%" stopColor="#f43f5e" />
+              </linearGradient>
+
+              {/* Peak Bar Gradient */}
+              <linearGradient id="roseBarPeak" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f43f5e" />
+                <stop offset="100%" stopColor="#be123c" />
+              </linearGradient>
+            </defs>
+
+            {/* Horizontal Gridlines & Y-Axis Labels */}
+            {yTicks.map((tick) => {
+              const y = getY(tick);
+              const isBase = tick === 0;
+
+              return (
+                <g key={`ytick-${tick}`}>
+                  {/* Y-Axis Label */}
+                  <text
+                    x={chartLeft - 10}
+                    y={y + 4}
+                    textAnchor="end"
+                    className="text-[12px] font-bold fill-slate-500"
+                    style={{ fontFamily: 'inherit' }}
+                  >
+                    {tick}
+                  </text>
+
+                  {/* Horizontal Grid Line */}
+                  <line
+                    x1={chartLeft}
+                    y1={y}
+                    x2={chartRight}
+                    y2={y}
+                    stroke={isBase ? '#cbd5e1' : '#e2e8f0'}
+                    strokeWidth={isBase ? '1.5' : '1'}
+                    strokeDasharray={isBase ? undefined : '3 3'}
+                  />
+                </g>
+              );
+            })}
+
+            {/* Vertical Y-Axis Line */}
+            <line
+              x1={chartLeft}
+              y1={chartTop - 6}
+              x2={chartLeft}
+              y2={chartBottom}
+              stroke="#cbd5e1"
+              strokeWidth="1.5"
+            />
+
+            {/* Bars and Values */}
+            {data.map((item, idx) => {
+              const barHeight = (item.count / maxVal) * chartHeight;
+              const xCenter = chartLeft + (idx + 0.5) * slotWidth;
+              const barX = xCenter - barWidth / 2;
+              const barY = chartBottom - barHeight;
+              const isHovered = activeSlot === item.timeSlot;
+              const isPeak = item.count === summary.peakCount;
+              const radius = 5;
+
+              // Rounded-top only SVG path
+              const barPath = `
+                M ${barX},${chartBottom}
+                L ${barX},${barY + radius}
+                Q ${barX},${barY} ${barX + radius},${barY}
+                L ${barX + barWidth - radius},${barY}
+                Q ${barX + barWidth},${barY} ${barX + barWidth},${barY + radius}
+                L ${barX + barWidth},${chartBottom}
+                Z
+              `;
+
+              return (
+                <g
+                  key={item.timeSlot}
+                  className="cursor-pointer transition-all duration-200"
+                  onMouseEnter={() => setActiveSlot(item.timeSlot)}
+                  onMouseLeave={() => setActiveSlot(null)}
+                >
+                  {/* Invisible Hitbox for easier hover */}
+                  <rect
+                    x={xCenter - slotWidth / 2}
+                    y={chartTop}
+                    width={slotWidth}
+                    height={chartBottom - chartTop + 35}
+                    fill="transparent"
+                  />
+
+                  {/* Vertical Bar */}
+                  <path
+                    d={barPath}
+                    fill={isHovered ? 'url(#roseBarHover)' : isPeak ? 'url(#roseBarPeak)' : 'url(#roseBarGrad)'}
+                    className="transition-all duration-200"
+                    filter={isHovered ? 'drop-shadow(0 4px 6px rgba(244, 63, 94, 0.35))' : undefined}
+                  />
+
+                  {/* Value Above Bar */}
+                  <text
+                    x={xCenter}
+                    y={barY - 8}
+                    textAnchor="middle"
+                    className={`text-[13px] font-bold ${isPeak ? 'fill-slate-950 font-black' : 'fill-slate-800'
+                      }`}
+                    style={{ fontFamily: 'inherit' }}
+                  >
+                    {item.count}
+                  </text>
+
+                  {/* X-Axis Interval Label */}
+                  <text
+                    x={xCenter}
+                    y={chartBottom + 19}
+                    textAnchor="middle"
+                    className={`text-[10.5px] font-bold tracking-tight ${isHovered ? 'fill-rose-600 font-extrabold' : 'fill-slate-700'
+                      }`}
+                    style={{ fontFamily: 'inherit' }}
+                  >
+                    {item.timeSlot}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+
+      {/* 3. Bottom Context Sub-bar: Peak Window & Security Patrol Note */}
+      <div className="px-3.5 py-1.5 bg-rose-50/40 border-t border-rose-100/70 flex items-center justify-between text-[10.5px] text-slate-600 h-7 shrink-0 cursor-pointer">
+        <span className="truncate mr-2">
+          Peak Window:{' '}
+          <strong className="text-rose-600 font-bold">{summary.peakSlot}</strong> ({summary.peakCount} Thefts ·{' '}
+          {summary.peakPercentage}%)
+        </span>
+        <span className="font-semibold text-slate-500 shrink-0 flex items-center gap-1">
+          <AlertTriangle className="w-3 h-3 text-amber-500" />
+          Rush: 12PM-6PM ({summary.rushWindowPercentage}%)
+        </span>
+      </div>
+
+      {/* 4. Details Modal (Opened via "View Details ->") */}
+      {showDetailsModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-rose-50 via-rose-50/60 to-white px-4 py-3 border-b border-rose-100 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center shadow-xs">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">
+                    Theft by Time of Day - Detailed Analysis
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Incident frequency & security shift allocation
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowDetailsModal(false)}
+                className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Content Table */}
+            <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Thefts</span>
+                  <span className="text-base font-black text-slate-900">{summary.totalIncidents}</span>
+                </div>
+                <div className="bg-rose-50 border border-rose-200 rounded-xl p-2.5">
+                  <span className="text-[10px] uppercase font-bold text-rose-500 block">Peak Slot</span>
+                  <span className="text-sm font-black text-rose-700">{summary.peakSlot}</span>
+                </div>
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5">
+                  <span className="text-[10px] uppercase font-bold text-amber-600 block">High Risk Window</span>
+                  <span className="text-sm font-black text-amber-800">12PM - 6PM</span>
+                </div>
+              </div>
+
+              {/* Time Slots Table */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+                <div className="bg-slate-100/80 px-3 py-2 font-bold text-slate-700 grid grid-cols-4">
+                  <span>Time Slot</span>
+                  <span>Category</span>
+                  <span className="text-center">Thefts</span>
+                  <span className="text-right">% of Day</span>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {data.map((item) => {
+                    const pct = ((item.count / summary.totalIncidents) * 100).toFixed(1);
+                    const isPeak = item.count === summary.peakCount;
+
+                    return (
+                      <div
+                        key={item.timeSlot}
+                        className={`px-3 py-2 grid grid-cols-4 items-center ${isPeak ? 'bg-rose-50/50 font-semibold text-rose-900' : 'text-slate-700'
+                          }`}
+                      >
+                        <span className="font-bold">{item.timeSlot}</span>
+                        <span className="text-slate-500">{item.label}</span>
+                        <span className="text-center font-bold">{item.count}</span>
+                        <span className="text-right text-slate-600">{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDetailsModal(false)}
+                className="px-3.5 py-1.5 rounded-lg bg-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-300 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

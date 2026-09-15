@@ -16,7 +16,17 @@ This document outlines the key technical challenges, design dilemmas, architectu
 8. [Challenge 7: Data Security vs. Clutter in RFID EPC Action Elements](#8-challenge-7-data-security-vs-clutter-in-rfid-epc-action-elements)
 9. [Challenge 8: Edge Cases in Dynamic Store & Date Filter Selectors](#9-challenge-8-edge-cases-in-dynamic-store--date-filter-selectors)
 10. [Challenge 9: Zero-Warning Code Quality & Production Optimization](#10-challenge-9-zero-warning-code-quality--production-optimization)
-11. [Summary & Architectural Takeaways](#11-summary--architectural-takeaways)
+11. [Challenge 10: Scrollbar Consistency Across Dashboard & Analytics Widgets](#11-challenge-10-scrollbar-consistency-across-dashboard--analytics-widgets)
+12. [Challenge 11: Time-of-Day Theft Incident Bar Chart & Cohesive Analytics Integration](#12-challenge-11-time-of-day-theft-incident-bar-chart--cohesive-analytics-integration)
+13. [Challenge 12: Day-of-Week Theft Incident Distribution & Symmetrical 2x2 Grid Harmony](#13-challenge-12-day-of-week-theft-incident-distribution--symmetrical-2x2-grid-harmony)
+14. [Challenge 13: Progress Bar Relative Normalization vs. True Shrink Share Representation](#14-challenge-13-progress-bar-relative-normalization-vs-true-shrink-share-representation)
+15. [Challenge 14: Global Cursor Pointer Consistency Across Custom Dashboard Componentry](#15-challenge-14-global-cursor-pointer-consistency-across-custom-dashboard-componentry)
+16. [Challenge 15: Operational Reports Table, Multi-Column Sorting, Client-Side Pagination & Multi-Format Export Architecture](#16-challenge-15-operational-reports-table-multi-column-sorting-client-side-pagination--multi-format-export-architecture)
+17. [Challenge 16: Zero-Dependency React DataTable Engine & Component Replacement](#17-challenge-16-zero-dependency-react-datatable-engine--component-replacement)
+18. [Challenge 17: Split Button Geometry, High-Contrast Sort Indicators, Table Typography & Isolated PDF/Print Engine](#18-challenge-17-split-button-geometry-high-contrast-sort-indicators-table-typography--isolated-pdfprint-engine)
+19. [Challenge 18: Table Text Selection vs. Horizontal Scrolling & Unified Custom Scrollbar](#19-challenge-18-table-text-selection-vs-horizontal-scrolling--unified-custom-scrollbar)
+20. [Challenge 19: Complete Intra-Row Typographic Uniformity, Event Type Badges & Streamlined Export](#20-challenge-19-complete-intra-row-typographic-uniformity-event-type-badges--streamlined-export)
+21. [Summary & Architectural Takeaways](#21-summary--architectural-takeaways)
 
 ---
 
@@ -220,13 +230,397 @@ Iterative UI modifications generated orphaned imports (`ArrowRight`, `ShieldChec
 
 ---
 
-## 11. Summary & Architectural Takeaways
+## 11. Challenge 10: Scrollbar Consistency Across Dashboard & Analytics Widgets
+
+### The Problem
+In `TopStolenData.jsx`, when the stolen articles list was constrained with a fixed vertical height (`h-[192px]`), applying unstyled `overflow-auto` caused Windows browsers to render the default native system scrollbar (bulky 17px grey track and square thumb). This clashed with the sleek, custom 5px rounded scrollbar design language (`.custom-scrollbar`) established in `DashboardOverview.jsx` for the Untagged and Theft alert stacks.
+
+### Technical Solution
+1. **Applied Design System Utility (`custom-scrollbar`)**:
+   - Replaced `overflow-auto` with `overflow-y-auto custom-scrollbar` on the scrollable container.
+   - Leveraged the `.custom-scrollbar` rules defined in `src/index.css` (5px width, transparent track, rounded `#cbd5e1` thumb, and `#94a3b8` on hover).
+2. **Padding Compensation**:
+   - Added subtle right padding (`pr-1.5`) to prevent the 5px thumb from crowding the right-aligned loss values (`₹24,000`), ensuring smooth scrolling and optimal visual breathing room.
+
+---
+
+## 12. Challenge 11: Time-of-Day Theft Incident Bar Chart & Cohesive Analytics Integration
+
+### The Problem
+Retail store managers needed to identify high-risk temporal windows to allocate security staff effectively. The user provided a reference bar chart widget titled **"Theft by Time of Day"** with:
+- Y-axis scale of `0, 10, 20, 30` with subtle dashed horizontal gridlines.
+- 6 discrete time intervals: `6AM - 9AM` (12), `9AM - 12PM` (18), `12PM - 3PM` (25 - Peak), `3PM - 6PM` (20), `6PM - 9PM` (15), `9PM - 12AM` (8).
+- Coral-red vertical bars with rounded top corners and bold values centered directly above each bar.
+- Actionable "View Details →" interactive trigger.
+
+Integrating this into `AnalyticsView.jsx` directly below the theft count presented key challenges:
+1. **Mathematical SVG Alignment**: Standard HTML/CSS bars often shift text labels or introduce misalignment between grid lines, tick labels, and bar tops.
+2. **Top-Only Corner Rounding**: Standard SVG `<rect rx="5">` curves both top and bottom corners, violating the reference image where bar bottoms sit flat against the zero baseline.
+3. **Multi-Column Dashboard Balance**: Positioning the new widget beneath `TopStolenData` in the right column required responsive vertical rhythm matching the left column's 3D Pie Chart.
+
+### Technical Solution
+1. **Precision Pure SVG Coordinate Engine**:
+   - Implemented `TheftByTimeOfDay.jsx` using a responsive SVG coordinate system (`viewBox="0 0 520 225"`).
+   - Y-ticks (`[0, 10, 20, 30]`) dynamically compute horizontal dashed gridlines (`strokeDasharray="3 3"`) and baseline axis lines.
+   - Text elements for values (`12, 18, 25, 20, 15, 8`) are mathematically positioned with `textAnchor="middle"` at `y = barY - 8`.
+2. **Custom Rounded-Top SVG Path**:
+   - Engineered custom SVG paths to curve only the top-left and top-right corners while keeping the bottom edges flat:
+     ```svg
+     M ${barX},${chartBottom}
+     L ${barX},${barY + radius}
+     Q ${barX},${barY} ${barX + radius},${barY}
+     L ${barX + barWidth - radius},${barY}
+     Q ${barX + barWidth},${barY} ${barX + barWidth},${barY + radius}
+     L ${barX + barWidth},${chartBottom}
+     Z
+     ```
+3. **Interactive Experience & Loss Prevention Advisory**:
+   - Added hover effects with drop-shadows and subtle gradient brightening.
+   - Built a sleek "View Details" modal featuring a full tabular breakdown of time slots, percentages of daily total, and security patrol recommendations (e.g. allocating additional marshals during the 12PM–3PM afternoon rush).
+   - Paired `<TheftByTimeOfDay />` directly below `<TopStolenData />` within a unified right-column theft analytics stack (`space-y-4`).
+
+---
+
+## 13. Challenge 12: Day-of-Week Theft Incident Distribution & Symmetrical 2x2 Grid Harmony
+
+### The Problem
+Following the implementation of the hourly distribution widget, store operations required visibility into weekly shrink rhythms across the calendar cycle. The user provided a second reference bar chart widget titled **"Theft by Day of Week"** with:
+- Y-axis scale of `0, 10, 20, 30, 40` (an extended 40-unit domain).
+- 7 days of the week: `Mon` (22), `Tue` (18), `Wed` (35 - Peak), `Thu` (27), `Fri` (30), `Sat` (25), `Sun` (20).
+- Vibrant sky-blue rounded-top vertical bars with exact values above each bar.
+- Requirement to position this component directly beside the `TheftByTimeOfDay` component.
+
+Key technical hurdles included:
+1. **Dynamic Domain Scaling**: Unlike the hourly chart's 30-unit maximum, weekly incident counts peaked at 35, requiring an expanded 40-unit Y-axis grid with 5 horizontal tick lines.
+2. **7-Column Geometry vs. 6-Column Geometry**: The 7-day interval required adjusting bar widths (40px vs 46px) and slot distribution (`plotWidth / 7`) while maintaining identical card footprints.
+3. **2x2 Grid Equilibrium**: Pairing `TheftByTimeOfDay` and `TheftByDayOfWeek` side-by-side in Row 2 created a balanced 4-card matrix across `AnalyticsView.jsx` (Row 1: 3D Pie + Stolen Items; Row 2: Hourly Thefts + Weekly Thefts).
+
+### Technical Solution
+1. **Reusable SVG Coordinate Engine with 40-Unit Max Domain**:
+   - Engineered `TheftByDayOfWeek.jsx` with an adaptable SVG calculation engine (`yTicks = [0, 10, 20, 30, 40]`).
+   - Dynamically generated 5 horizontal dashed guide lines with the zero baseline rendered as a solid axis.
+2. **Brand-Themed Color System**:
+   - Applied a vibrant sky-blue design language (`#00a8e7` gradient fill, sky-200 border, and calendar icon badge) distinct from the rose-red hourly chart, providing immediate visual differentiation between temporal dimensions.
+3. **Interactive Weekly Drill-down & Staffing Directives**:
+   - Integrated a modal breaking down weekday vs. weekend shrink volumes (132 vs. 45 incidents) and issued actionable store security directives (focusing additional exit gate guard presence on Wednesday and Friday peaks).
+4. **Symmetrical 2x2 Grid Placement**:
+   - Configured `AnalyticsView.jsx` so that `TheftByTimeOfDay` and `TheftByDayOfWeek` form Row 2 side-by-side beneath `TagStatusDistributionChart` and `TopStolenData`.
+
+---
+
+## 14. Challenge 13: Progress Bar Relative Normalization vs. True Shrink Share Representation
+
+### The Problem
+In `TopStolenData.jsx`, the progress bar fill width was initially computed relative to the highest theft count in the list:
+```javascript
+const maxTheftCount = Math.max(...items.map((i) => i.theftCount), 1);
+const widthPercent = (item.theftCount / maxTheftCount) * 100;
+```
+This produced a major cognitive usability issue:
+1. **Misleading 100% Full Bar**: The #1 stolen item (`Men's T-Shirt` with 12 thefts) always appeared 100% full, leading users to believe that 100% of the t-shirt inventory had been stolen or that 12 was a hard capacity limit.
+2. **Arbitrary Fractional Widths**: An item with 6 thefts appeared 50% full solely because it was half of 12, regardless of total store shrink volume.
+3. **Scroll Overlap Disorientation**: Because items lacked visual boundaries, scrolling the fixed-height list partially offscreen caused the bottom metadata line (`Article No: ... Loss: ...`) of the previous article to sit directly above the title of the next article, confusing users into thinking the Article No belonged to the product below it.
+4. **Low Contrast Share Badges**: The percentage badge was initially styled in pale muted grey, making it difficult to read against light card backgrounds.
+
+### Technical Solution
+1. **Share-of-Total Normalization**:
+   - Replaced `maxTheftCount` normalization with the actual cumulative sum of all stolen merchandise (`totalThefts`):
+     ```javascript
+     const totalThefts = Math.max(items.reduce((sum, i) => sum + i.theftCount, 0), 1);
+     const sharePercent = ((item.theftCount / totalThefts) * 100).toFixed(1);
+     ```
+   - The bar width now directly depicts the article's true slice of total retail shrink (e.g. `Men's T-Shirt`: 12/35 = **34.3%**; `Sports Shoes`: 8/35 = **22.9%**; `Backpack`: 4/35 = **11.4%**).
+2. **Dedicated Enclosed Card Containers**:
+   - Enclosed each stolen item in its own distinct card container (`rounded-xl bg-white border border-slate-200/90 shadow-2xs p-2 sm:p-2.5 hover:border-rose-200 hover:shadow-xs`).
+   - Every product's description, progress bar, article number, and loss value are physically locked within their own bordered frame, completely preventing visual bleeding into adjacent items during scrolling.
+3. **High-Contrast Percentage Pill**:
+   - Upgraded the percentage badge to high-visibility rose styling (`text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-md shadow-2xs`), making it instantly legible.
+
+---
+
+## 15. Challenge 14: Global Cursor Pointer Consistency Across Custom Dashboard Componentry
+
+### The Problem
+Tailwind CSS v4 preflight does not assign `cursor: pointer` to HTML `<button>` or interactive custom containers by default. Furthermore, custom cards with active hover transformations (`hover:-translate-y-0.5`, `hover:shadow-md`) such as `StatCard`, `EpcCard`, and `TopStolenData` items displayed standard text/arrow cursors on Windows browsers. This led to an inconsistent tactile feedback experience where users could not immediately perceive which dashboard cards and badges were interactively responsive.
+
+### Technical Solution
+1. **Global CSS Pointer Enforcement**:
+   - Injected global interactive cursor rules in `src/index.css`:
+     ```css
+     button,
+     [role="button"],
+     [role="option"],
+     [role="tab"],
+     a,
+     select,
+     summary,
+     input[type="button"],
+     input[type="submit"],
+     input[type="reset"],
+     input[type="checkbox"],
+     input[type="radio"],
+     .cursor-pointer {
+       cursor: pointer !important;
+     }
+     ```
+2. **Explicit Component-Level Class Assignment**:
+   - `StatCard.jsx`: Added `cursor-pointer` to root card containers.
+   - `EpcCard.jsx`: Added `cursor-pointer` to root card containers.
+   - `TopStolenData.jsx`: Added `cursor-pointer` to enclosed product cards and header badges.
+   - `TheftByTimeOfDay.jsx` & `TheftByDayOfWeek.jsx`: Ensured all bars, hitboxes, and footer context sub-bars consistently display `cursor-pointer`.
+   - `TagStatusDistributionChart.jsx`: Added `cursor-pointer` to bottom context sub-bars and legend items.
+   - `DashboardOverview.jsx`: Added `cursor-pointer` to count badges and sub-bars.
+
+---
+
+## 16. Challenge 15: Operational Reports Table, Multi-Column Sorting, Client-Side Pagination & Multi-Format Export Architecture
+
+### The Problem
+Retail loss prevention supervisors and store security leads require an enterprise-grade tabular reporting console to audit security incidents, reconcile missing stock, and export evidence for law enforcement or shrinkage audits. The reports view needed to satisfy strict operational criteria:
+1. **10 Structured Data Columns**: `Sr no` (clean numeric index without `#`), `date` (standard `dd-mm-yyyy` with time), `storeCode` (dedicated column with store code chip, e.g. `HD55`), `storeName` (dedicated column with physical store location, e.g. `Dwarka`), `epc` (clean monospace identifier), `articleNo`, `articleDescription` (focused merchandise title), `qty`, `amount` (INR `₹`), and `eventType` (`Theft` vs `Untagged`).
+2. **Above-Table Quick Density Selector**: Immediate 1-click segmented row density buttons (`10`, `20`, `50`) situated directly in the primary toolbar above the table alongside search, enabling instant pagination adjustments without scrolling to the footer.
+3. **Clean Monospace EPC Display**: Direct, uncluttered EPC RFID hex string rendering with full text selectable affordance (`select-all`) and zero clipboard prompt clutter.
+4. **Client-Side Pagination**: Responsive navigation across pages with customizable page densities (10, 20, 50 rows per page) and dynamic entry bounds counters.
+5. **Multi-Column Sorting**: Bidirectional sorting on all 10 columns (including `storeCode` and `storeName`) with visual indicators (`ArrowUp`, `ArrowDown`, `ArrowUpDown`).
+6. **Multi-Format Export Options**: Instant download to standard CSV, structured JSON, and printer-ready layout.
+7. **Consistent Cursor Affordance**: Strict adherence to the `cursor-pointer` requirement on all rows, headers, density buttons, and action controls.
+
+### Root Causes & Engineering Dilemmas
+1. **Chronological Sorting Pitfalls**: Sorting dates formatted as human-readable strings (e.g. `'14 Sep 2026'`) alphabetically resulted in incorrect chronological order (e.g. September after October).
+2. **Spreadsheet Character Encoding Corruption**: Generating raw UTF-8 CSV blobs without a Byte Order Mark (`\uFEFF`) causes Microsoft Excel on Windows to misinterpret special characters (such as the Indian Rupee symbol `₹` or apostrophes in `"Men's"`).
+3. **Pagination Boundary Overflow**: When an operator filters records by search keyword or event type while on page 3 or 4, the active page could exceed the new `totalPages`, resulting in an empty table view unless automatically reset to page 1.
+4. **Clipboard State Ephemerality**: Copying long EPC hex codes without visual cues causes operators to repeatedly click the button, unsure if the copy operation succeeded.
+
+### Technical Solution
+1. **Deterministic Multi-Type Sorting Engine**:
+   Implemented in `src/components/reports/ReportsView.jsx` with dedicated type branch logic:
+   ```javascript
+   const sortedData = useMemo(() => {
+     const data = [...filteredData];
+     return data.sort((a, b) => {
+       let aVal = a[sortField];
+       let bVal = b[sortField];
+
+       // Chronological comparison using raw ISO timestamps
+       if (sortField === 'date') {
+         aVal = new Date(a.timestamp).getTime();
+         bVal = new Date(b.timestamp).getTime();
+       }
+
+       if (typeof aVal === 'string') {
+         const comparison = aVal.localeCompare(bVal);
+         return sortDirection === 'asc' ? comparison : -comparison;
+       }
+
+       if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+       return 0;
+     });
+   }, [filteredData, sortField, sortDirection]);
+   ```
+
+2. **Boundary-Safe Pagination Pipeline**:
+   - Calculated active slice bounds: `startIndex = (currentPage - 1) * rowsPerPage`, `currentRows = sortedData.slice(startIndex, startIndex + rowsPerPage)`.
+   - Guaranteed boundary integrity by resetting `currentPage` to `1` inside filter/search change handlers and using `Math.max(1, Math.ceil(sortedData.length / rowsPerPage))`.
+   - Rendered quick-jump numeric buttons and row-density dropdown (10, 20, 50).
+
+3. **Native Microsoft Excel (.xlsx) & Multi-Format Export Engine**:
+   - Integrated SheetJS (`xlsx`) for generating binary `.xlsx` workbooks with defined column widths and sheet naming (`Security Incidents`):
+     ```javascript
+     const exportToExcel = () => {
+       const exportData = sortedData.map((item, idx) => ({
+         'Sr No': idx + 1,
+         'Date': item.date,
+         'Time': item.time,
+         'Store Code': item.storeCode,
+         'Store Name': item.storeName,
+         'EPC Code': item.epc,
+         'Article No': item.articleNo,
+         'Article Description': item.articleDescription,
+         'Qty': item.qty,
+         'Amount (INR)': item.amount,
+         'Event Type': item.eventType,
+       }));
+       const worksheet = XLSX.utils.json_to_sheet(exportData);
+       worksheet['!cols'] = [
+         { wch: 8 }, { wch: 14 }, { wch: 8 }, { wch: 12 }, { wch: 18 },
+         { wch: 28 }, { wch: 14 }, { wch: 32 }, { wch: 8 }, { wch: 14 }, { wch: 12 }
+       ];
+       const workbook = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(workbook, worksheet, 'Security Incidents');
+       XLSX.writeFile(workbook, `goods_security_report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+     };
+     ```
+   - Primary one-click emerald button for **Export to Excel** with drop-down access to CSV, JSON, and printable views.
+
+4. **Identical StatCard Alignment with AnalyticsView**:
+   - Replaced custom cards with the standard 4-variant `StatCard` componentry (`Total Tags` in green, `Untagged` in blue, `Theft Alerts` in gray, and `Potential Loss` in rose).
+   - Synchronized 600ms shimmer skeleton loading with store filter switching.
+
+5. **Clean Monospace EPC Display & Selectable Affordance**:
+   - Streamlined the EPC column into an uncluttered, high-contrast monospace chip (`bg-slate-100/90 text-slate-700 font-mono text-[11px] select-all`) without redundant copy action icons.
+   - Preserved instant multi-field search and CSV/JSON/Excel export fidelity.
+
+6. **Rows Per Page Dropdown Header Alignment**:
+   - Positioned the standard `Rows: [ 10 v ]` pill dropdown directly above the table next to the search input, matching the established UI typography and appearance.
+
+---
+
+## 17. Challenge 16: Native React 19 React-DataTable Component Architecture & Declarative Column Schema
+
+### The Problem
+The user requested converting the operational reports table into a true **React DataTable**. In typical React ecosystems, developers install `react-data-table-component`. However, in modern applications utilizing React 19 and Vite with Tailwind CSS v4, third-party table libraries face critical roadblocks:
+1. **React 19 Incompatibility with Styled-Components**: `react-data-table-component` relies strictly on `styled-components` v5/v6 as a peer dependency. `styled-components` has well-documented breaking issues and hook lifecycle crashes under React 19.
+2. **Bundle Overhead & CSS Runtime Bloat**: Introducing styled-components introduces ~100kB+ of client-side runtime CSS injection that fights Tailwind CSS v4's build-time engine.
+3. **Environment Installation Constraints**: Remote tarball downloads may be restricted or blocked in enterprise/sandboxed development environments (`EALLOWREMOTE`), making ad-hoc third-party library additions brittle.
+4. **Monolithic Maintenance Overhead**: The existing table implementation in `ReportsView.jsx` had grown to over 740 lines of code with hardcoded HTML table elements, repetitive table header tags, manual pagination arithmetic, and no reusable abstractions.
+
+### Technical Solution: Building `src/components/common/DataTable.jsx`
+Engineered a lightweight, production-grade, zero-dependency **`<DataTable />`** component tailored for React 19 and Tailwind CSS v4 that faithfully implements the standard `react-data-table-component` API and aesthetic:
+
+1. **Declarative Column Engine**:
+   - Columns are defined declaratively as an array of column schemas:
+     ```javascript
+     const columns = [
+       { id: 'srNo', name: 'Sr No', selector: (row) => row.srNo, sortable: true, width: '75px', center: true },
+       { id: 'date', name: 'Date & Time', selector: (row) => row.timestamp, sortFunction: (a, b) => ..., sortable: true },
+       { id: 'storeCode', name: 'Store Code', selector: (row) => row.storeCode, sortable: true, width: '110px', center: true },
+       ...
+     ];
+     ```
+   - Automatically supports custom cell renderers (`cell: (row, index) => ReactNode`), alignments (`center`, `right`), auto widths, text wrapping (`wrap`), and column sorting.
+
+2. **Selectable Rows & Indeterminate Checkbox State**:
+   - Added `selectableRows` support with a master checkbox in `<thead>` and row checkboxes in `<tbody>`.
+   - Utilized React `useRef` to safely set `input.indeterminate` when some (but not all) rows on the active page are selected.
+   - Selected rows receive an automated subtle highlight (`bg-[#00a8e7]/8`).
+   - Dispatches `onSelectedRowsChange({ allSelected, selectedCount, selectedRows })` allowing parent views (such as `ReportsView.jsx`) to dynamically adapt export actions (e.g. `Export to Excel (3)`).
+
+3. **Iconic React DataTable Pagination Controls**:
+   - Replaced custom pagination with the classic React DataTable control layout:
+     - Left: Selected row count indicator (`X rows selected`) with instant `Clear` action, or bounds text (`Showing 1 to 10 of 35 records`).
+     - Right: `Rows per page: [ 10 v ]` pill dropdown, range counter (`1-10 of 35`), First Page (`|<`), Previous Page (`<`), numbered page quick-jump pills, Next Page (`>`), and Last Page (`>|`).
+
+4. **Progress Pending Shimmer & Empty States**:
+   - Integrated `progressPending` prop that renders 5 pulsating shimmer skeleton rows (`animate-pulse bg-slate-50/40`) with randomized chip widths while loading.
+   - Added a modern, centered empty state (`noDataComponent`) with inbox illustration when search filters yield zero matches.
+
+5. **SubHeader Integration**:
+   - Supports `subHeader` and `subHeaderComponent`, cleanly hosting the search bar, the top `Rows: [ 10 v ]` selector pill, event type segment buttons, and the SheetJS Excel export button.
+
+---
+
+## 18. Challenge 17: Split Button Geometry, High-Contrast Sort Indicators, Table Typography & Isolated PDF/Print Engine
+
+### The Problem
+During visual inspection and operational user review of the reports console, several UI flaws and formatting gaps were identified:
+1. **Split Export Button Misalignment**: The primary "Export to Excel" action button and its adjacent chevron dropdown button exhibited uneven heights and a visible color seam. The icon-only chevron button had a smaller intrinsic height than the text button, causing flex baseline sagging and a disjointed pill shape.
+2. **Sort Arrow Invisibility**: Unsorted column arrows used low-opacity slate (`text-slate-300 opacity-40`), making them virtually invisible on light backgrounds and leaving users uncertain whether columns were sortable.
+3. **Table Header & Body Formatting Weaknesses**: The previous header used uppercase, 11px pale gray text with tight padding, while the body lacked vertical centering and clear row contrast.
+4. **Checkbox Clutter**: Operators requested removing the multi-select checkboxes to keep the operational auditing table focused, uncluttered, and maximizing horizontal space for merchandise descriptions and EPC codes.
+5. **Print Pollution (Printing Entire Page vs. Table Only)**: Invoking `window.print()` printed the entire application shell (sidebar, navigation bar, stat cards, search toolbar, and pagination controls) instead of producing a clean, formal incident audit table report suitable for saving as a PDF.
+
+### Technical Solution
+1. **Unified Split Button Container Geometry**:
+   - Replaced independent sibling buttons with an enclosing container: `inline-flex items-stretch h-9 rounded-xl shadow-xs overflow-hidden bg-emerald-600`.
+   - Both the main Excel button and the chevron toggle button use `h-full bg-transparent hover:bg-black/10 active:bg-black/20`, guaranteeing 100% mathematical height parity and consistent background color with zero vertical displacement.
+   - Inserted a crisp semi-transparent divider (`w-[1px] bg-white/25 self-stretch my-1.5`).
+
+2. **High-Contrast, Accessible Sort Indicators**:
+   - Replaced invisible sort icons with high-contrast glyphs in `DataTable.jsx`:
+     - **Unsorted Columns**: `<ArrowUpDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 stroke-[2] opacity-80 group-hover:opacity-100 transition-all" />`.
+     - **Active Sorted Columns**: `<ArrowUp className="w-3.5 h-3.5 text-[#00a8e7] stroke-[2.5]" />` or `<ArrowDown className="w-3.5 h-3.5 text-[#00a8e7] stroke-[2.5]" />` with bold column label text (`text-[#00a8e7] font-extrabold`).
+
+3. **Enterprise Table Header & Cell Typography**:
+   - **Header (`<thead>`)**: Upgraded to `bg-slate-100/90 border-b-2 border-slate-200 text-xs font-bold text-slate-700 py-3.5 px-4` in natural title casing.
+   - **Body (`<tbody>`)**: Refined to `divide-y divide-slate-200/80 text-xs font-medium text-slate-800` with `py-3.5 px-4 align-middle` on cells, ensuring clean vertical centering of monospace chips, badges, and numbers.
+
+4. **Checkbox Removal**:
+   - Set `selectableRows={false}` in `ReportsView.jsx`, reclaiming horizontal column real estate and streamlining the visual flow.
+
+5. **Isolated `@media print` CSS Engine & Print Table Component**:
+   - Configured `@media print` rules in `src/index.css`:
+     ```css
+     @media print {
+       nav, aside, header, footer, button, input, select, .no-print { display: none !important; }
+       body * { visibility: hidden; }
+       #printable-report-area, #printable-report-area * { visibility: visible !important; }
+       #printable-report-area { position: absolute !important; left: 0; top: 0; width: 100% !important; margin: 0; padding: 16px; }
+     }
+     ```
+   - In `ReportsView.jsx`, added a dedicated print-only letterhead header and a full-width print table rendering all filtered records across clean page breaks.
+   - Added a direct **"Save to PDF / Print"** option to the export dropdown with a helper subtitle *"Prints table only"*.
+
+6. **Row Typographic Parity & Visual Background Cleanup**:
+   - Simplified Date column from multiline `Date & Time` to clean `Date` (`dd-mm-yyyy`), removing secondary time timestamps.
+   - Stripped bulky background badges and borders from `EPC Code` (now clean monospace text) and `Qty` (clean centered number without circular pills).
+   - Standardized uniform 11px font size (`text-[11px]`) across the entire row and cell structure, ensuring perfect visual hierarchy and high data density.
+
+---
+
+## 19. Challenge 18: Table Text Selection vs. Horizontal Scrolling & Unified Custom Scrollbar
+
+### The Problem
+Wide enterprise tabular reporting consoles overflow horizontally on standard laptops and compact monitors. While mouse drag-to-scroll was initially introduced, operators reported a critical UX conflict:
+1. **Inability to Select & Copy Table Cells**: Mouse drag listeners intercepted clicks and mouse movements (`select-none` and `cursor-grab`), preventing users from selecting EPC codes, article numbers, or descriptions for copying.
+2. **Scrollbar Aesthetics**: Operators still required a sleek, non-intrusive horizontal scrollbar matching the 5px slim scrollbars of dashboard cards.
+
+### Technical Solution
+1. **Unrestricted Text Selection & Cursor Restoration**:
+   - Removed mouse drag interception listeners (`onMouseDown`, `onMouseMove`, `onMouseUp`, `onMouseLeave`) and `cursor-grab` / `cursor-grabbing` from [DataTable.jsx](file:///e:/Loss-Prevention-Goods-Security/src/components/common/DataTable.jsx).
+   - Applied `select-text` to enable native, frictionless click-and-drag text selection across all rows and cells.
+2. **Unified 5px Custom Horizontal Scrollbar**:
+   - Preserved `overflow-x-auto custom-scrollbar` with 5px height, allowing smooth trackpad, shift+wheel, and scrollbar thumb navigation without compromising text selection.
+
+---
+
+## 20. Challenge 19: Complete Intra-Row Typographic Uniformity, Event Type Badges & Streamlined Export
+
+### The Problem
+1. **Event Type Background Dilution**: Diluted opacity (`bg-rose-50/80`) made the status background appear washed out on white rows, departing from the clean reference appearance.
+2. **Export Clutter**: Maintaining redundant export options (CSV alongside Excel and JSON) cluttered the dropdown menu when operators standardize on Microsoft Excel (`.xlsx`) and PDF reports.
+3. **Reference Style Parity**: The user required `Theft` (`bg-rose-50`) and `Untagged` (`bg-sky-50`) to maintain a rounded border like the search input (`rounded-xl border border-slate-300`) while preserving solid background color fills and dark text (`text-slate-800 font-semibold text-[11px]`).
+
+### Technical Solution
+1. **Solid Background Fills with Search-Input Border Geometry**:
+   - Restored solid `bg-rose-50` (`#FFF4F5`) for `Theft` and `bg-sky-50` (`#F3FAFF`) for `Untagged`.
+   - Combined with `rounded-xl border border-slate-300` and vector icons (`AlertTriangle` text-rose-500, `TagX` text-[#00a8e7]).
+   - Retained uniform typography: `text-[11px] font-semibold text-slate-800`.
+2. **Streamlined Export Pipeline**:
+   - Removed the CSV export option and its handler from `ReportsView.jsx`, focusing the export menu on:
+     - **Microsoft Excel (.xlsx)**: Primary structured workbook download via SheetJS.
+     - **Save to PDF / Print**: Isolated print stylesheet output.
+     - **JSON Data (.json)**: Machine-readable audit export.
+3. **Print-View Parity**:
+   - Synchronized print-only table rows with matching `rounded-lg border border-slate-300 text-[9.5px] font-semibold text-slate-800` pills.
+
+---
+
+## 21. Summary & Architectural Takeaways
 
 | Feature / Area | Initial Challenge | Final Solution | Architectural Benefit |
 | :--- | :--- | :--- | :--- |
-| **Analytics Layout** | 3 cramped cards in 1 row caused text truncation | 2 cards per row (`lg:grid-cols-2`) with full-width bars | Zero truncation; spacious, executive readability |
+| **Analytics Layout** | 3 cramped cards in 1 row caused text truncation | 2x2 symmetrical grid (`lg:grid-cols-2`) | Clean visual balance; 4 focused, spacious analytical cards |
 | **Pie Chart Engine** | Flat, basic 2D SVG donut | Pure SVG Isometric 3D Extruded Pie Chart | Realistic cylinder depth, lighting, and pull-out animations |
 | **StatCard Alignment** | Generic categories conflicted with StatCards | Direct 1:1 mapping with 4 StatCards; loss moved to bottom | Single source of truth, intuitive user comprehension |
-| **Card Sizing** | Uneven card heights with varying item volumes | Strict 3-tier Flexbox column (`h-[60px]`, `h-8`, `flex-1`) | Guaranteed pixel alignment at 350px |
+| **Card Sizing** | Uneven card heights with varying item volumes | Strict 3-tier Flexbox column (`h-[60px]`, `h-8`, `flex-1`) | Guaranteed pixel alignment across both grid rows |
+| **Scrollbar Aesthetics** | Bulky browser default scrollbar clashed with design | Applied `overflow-y-auto custom-scrollbar pr-1.5` | Seamless, unified 5px scrollbar across all dashboard cards |
+| **Stolen Items Progress** | 100% full bar for #1 item caused user confusion | Normalized to `totalThefts` with explicit `%` pill | Accurate share-of-shrink visualization; zero ambiguity |
+| **Hourly Theft Bar Chart** | Lack of time-of-day shrink distribution | Pure SVG rounded-top bars, 30-max scale, and detail modal | Accurate guard shift scheduling during afternoon rush |
+| **Weekly Theft Bar Chart** | Lack of weekly cycle shrink patterns | Pure SVG rounded-top bars, 40-max scale, and 7-day modal | Pinpoints midweek shrink surge (Wed/Fri) with staffing advice |
+| **Cursor Hand Feedback** | Default arrow cursor on interactive cards/buttons | Enforced global & component `cursor: pointer` | Clear, uniform tactile affordance across all dashboard elements |
+| **Operational Reports Table** | Needed 10-column table with search, sort, paging & export | Comprehensive `ReportsView` with SheetJS Excel export, AnalyticsView StatCards, and top `Rows:` dropdown | Full enterprise auditability, native `.xlsx` export, and visual harmony |
+| **React DataTable Component** | Third-party packages conflict with React 19 / styled-components | Custom `src/components/common/DataTable.jsx` implementing full React DataTable schema | Reusable, zero-dependency, selectable rows, pagination, and skeleton loading |
+| **Export Split Button** | Button and dropdown arrow had mismatched heights and colors | Enclosed in `inline-flex items-stretch h-9 rounded-xl` with transparent sub-buttons | 100% pixel alignment and flawless visual cohesiveness |
+| **Sort Icon Visibility** | Faint gray sort arrows (`opacity-40`) were hard to see | Upgraded to `text-slate-400 stroke-[2]` and active blue `stroke-[2.5]` | High accessibility and instant sorting affordance |
+| **Isolated Print / PDF** | Browser print printed sidebar, navbar, and background UI | `@media print` rules isolating `#printable-report-area` with letterhead | Clean, professional PDF and printer output with table only |
+| **Row Typographic Parity** | Mismatched font sizes and bulky background chips in cells | Uniform 11px font size, clean text for EPC/Qty, date-only column | Seamless visual density, clean minimalism, and zero distraction |
+| **Intra-Row Uniformity** | EventType badge colors and variable font weights clashed | Solid `bg-rose-50`/`bg-sky-50` with `rounded-xl border border-slate-300` and `text-slate-800` | Reference-accurate styling matching search input geometry and palette |
+| **Table Text Selection** | Drag-scrolling hijacked mouse and blocked text selection | Removed drag listeners and enabled `select-text` with 5px scrollbar | Unrestricted text highlighting, cell copying, and smooth scrolling |
+| **Streamlined Export** | Redundant CSV option cluttered export menu | Focused on Excel (.xlsx), isolated Print/PDF, and JSON | Streamlined operational workflows without format confusion |
 | **Visual Aesthetics** | Generic flat panels without identity | Dual-tone 2px borders, themed gradient headers, live ping dots | Distinct, cohesive security-themed design system |
 | **Data Integrity** | Unformatted amounts, trailing hyphens, copy clutter | Indian currency formatting, conditional strings, clean chips | High operational trust and zero UI glitches |
+
+
+
+

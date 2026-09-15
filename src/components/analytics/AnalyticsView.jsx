@@ -4,8 +4,9 @@ import StoreFilter from '../common/StoreFilter';
 import DateFilter from '../common/DateFilter';
 import StatCard from '../common/StatCard';
 import TagStatusDistributionChart from './TagStatusDistributionChart';
-import CategoryWiseLoss from './CategoryWiseLoss';
 import TopStolenData from './TopStolenData';
+import TheftByTimeOfDay from './TheftByTimeOfDay';
+import TheftByDayOfWeek from './TheftByDayOfWeek';
 import { Tag, TagX, AlertTriangle, TrendingDown } from 'lucide-react';
 
 const AnalyticsView = () => {
@@ -58,16 +59,19 @@ const AnalyticsView = () => {
         />
       </div>
 
-      {/* 3. Analytics Visualizations Grid (2 Cards in One Row, Compact & Creative) */}
+      {/* 3. Analytics Visualizations Grid (2x2 Balanced Cards, Compact & Creative) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-        {/* Row 1, Left: Tag Status Distribution (Pie / Donut Chart) */}
+        {/* Row 1, Left: Tag Status Distribution (3D Isometric Pie Chart) */}
         <TagStatusDistributionChart />
 
-        {/* Row 1, Right: Category Wise Loss (Horizontal Bar Chart) */}
-        <CategoryWiseLoss />
+        {/* Row 1, Right: Top Stolen Items (Target Articles & Theft Counts) */}
+        <TopStolenData />
 
-        {/* Row 2: Top Stolen Items (Spanning 2 columns with dual-column items) */}
-        <TopStolenData className="lg:col-span-2" />
+        {/* Row 2, Left: Theft by Time of Day (Hourly Incident Bar Chart) */}
+        <TheftByTimeOfDay />
+
+        {/* Row 2, Right: Theft by Day of Week (Weekly Incident Bar Chart) */}
+        <TheftByDayOfWeek />
       </div>
     </div>
   );

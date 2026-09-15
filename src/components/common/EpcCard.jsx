@@ -65,7 +65,7 @@ export default function EpcCard({
   // 2. Active Compact EpcCard
   return (
     <div
-      className={`group relative w-full bg-white border border-slate-200/90 rounded-xl px-3.5 py-2.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm ${
+      className={`group relative w-full bg-white border border-slate-200/90 rounded-xl px-3.5 py-2.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm cursor-pointer ${
         isTheft
           ? 'border-l-2 border-l-rose-500 hover:border-rose-300'
           : 'border-l-2 border-l-[#00a8e7] hover:border-sky-300'

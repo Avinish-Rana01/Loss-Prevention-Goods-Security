@@ -11,8 +11,10 @@ export default function TopStolenData({
   items = TOP_STOLEN_ITEMS_DATA,
   className = '',
 }) {
-  const maxTheftCount = Math.max(...items.map((i) => i.theftCount), 1);
-  const totalThefts = items.reduce((sum, i) => sum + i.theftCount, 0);
+  const totalThefts = Math.max(
+    items.reduce((sum, i) => sum + i.theftCount, 0),
+    1
+  );
 
   return (
     <div
@@ -35,7 +37,7 @@ export default function TopStolenData({
         </div>
 
         {/* Count Badge on Right Side with Live Pulsing Dot */}
-        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1.5 shrink-0 shadow-2xs">
+        <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1.5 shrink-0 shadow-2xs cursor-pointer">
           <span className="relative flex h-1.5 w-1.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span>
@@ -44,15 +46,18 @@ export default function TopStolenData({
         </span>
       </div>
 
-      {/* 2. Compact Full-Width Progress Bar Items (Multi-column when wide) */}
+      {/* 2. Compact Full-Width Progress Bar Items with Distinct Card Containers */}
       <div className="p-3 sm:p-3.5 bg-slate-50/20 flex-1">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-2 h-[192px] overflow-y-auto custom-scrollbar pr-1.5">
           {items.map((item) => {
-            const widthPercent = (item.theftCount / maxTheftCount) * 100;
+            const sharePercent = ((item.theftCount / totalThefts) * 100).toFixed(1);
 
             return (
-              <div key={item.articleNumber} className="group flex flex-col gap-1">
-                {/* Line 1: Item Description on Left, Theft Count on Right */}
+              <div
+                key={item.articleNumber}
+                className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs hover:border-rose-200 hover:shadow-xs transition-all flex flex-col gap-1.5"
+              >
+                {/* Line 1: Item Description on Left, Theft Count & Highlighted Share % on Right */}
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span
@@ -64,28 +69,34 @@ export default function TopStolenData({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0 text-xs">
-                    <span className="font-bold text-rose-600">
-                      {item.theftCount}
-                    </span>
-                    <span className="text-[10px] font-medium text-slate-500">
-                      {item.theftCount === 1 ? 'theft' : 'thefts'}
+                  <div className="flex items-center gap-1.5 shrink-0 text-xs">
+                    <div className="flex items-baseline gap-1">
+                      <span className="font-bold text-rose-600">
+                        {item.theftCount}
+                      </span>
+                      <span className="text-[10px] font-medium text-slate-500">
+                        {item.theftCount === 1 ? 'theft' : 'thefts'}
+                      </span>
+                    </div>
+                    {/* Highlighted Percentage Badge with High Contrast */}
+                    <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-md shadow-2xs">
+                      {sharePercent}%
                     </span>
                   </div>
                 </div>
 
-                {/* Line 2: Full-Width Progress Bar */}
+                {/* Line 2: Full-Width Progress Bar (Share of Total) */}
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500 ease-out shadow-2xs"
                     style={{
-                      width: `${widthPercent}%`,
+                      width: `${sharePercent}%`,
                       backgroundColor: item.color,
                     }}
                   />
                 </div>
 
-                {/* Line 3: Article Number below progress bar on Left, Loss Value on Right */}
+                {/* Line 3: Article Number clearly grouped inside item container on Left, Loss Value on Right */}
                 <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5">
                   <div className="flex items-center gap-1">
                     <span className="text-slate-400 font-medium">Article No:</span>
