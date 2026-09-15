@@ -21,7 +21,7 @@ describe('TopNavbar Component', () => {
     expect(handleToggle).toHaveBeenCalledTimes(1);
   });
 
-  it('toggles notifications dropdown when bell icon is clicked', () => {
+  it('toggles notifications dropdown when bell icon is clicked and displays article, store, and time details', () => {
     render(<TopNavbar />);
 
     const bellBtn = screen.getByTitle('Theft & Security Alerts');
@@ -29,6 +29,13 @@ describe('TopNavbar Component', () => {
 
     expect(screen.getByText('Security Alerts')).toBeInTheDocument();
     expect(screen.getByText('2 New')).toBeInTheDocument();
+
+    // Verify article description as main, article no, store code, store name, and time
+    expect(screen.getByText('Men Slim Fit Denim Jeans')).toBeInTheDocument();
+    expect(screen.getByText('ART-10492')).toBeInTheDocument();
+    expect(screen.getByText(/HD55/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dwarka/i)).toBeInTheDocument();
+    expect(screen.getByText('14:22')).toBeInTheDocument();
   });
 
   it('renders user initials and handles logout action', () => {

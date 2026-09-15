@@ -27,7 +27,9 @@ This document outlines the key technical challenges, design dilemmas, architectu
 19. [Challenge 18: Table Text Selection vs. Horizontal Scrolling & Unified Custom Scrollbar](#19-challenge-18-table-text-selection-vs-horizontal-scrolling--unified-custom-scrollbar)
 20. [Challenge 19: Complete Intra-Row Typographic Uniformity, Event Type Badges & Streamlined Export](#20-challenge-19-complete-intra-row-typographic-uniformity-event-type-badges--streamlined-export)
 21. [Challenge 20: Full-Coverage Test Suite & React 19 / Vitest Test Automation Architecture](#21-challenge-20-full-coverage-test-suite--react-19--vitest-test-automation-architecture)
-22. [Summary & Architectural Takeaways](#22-summary--architectural-takeaways)
+22. [Challenge 21: Unified Webpage & Window Viewport Scrollbar Architecture](#22-challenge-21-unified-webpage--window-viewport-scrollbar-architecture)
+23. [Challenge 22: Contextual Alert Notifications Architecture with Comprehensive Metadata Hierarchy](#23-challenge-22-contextual-alert-notifications-architecture-with-comprehensive-metadata-hierarchy)
+24. [Summary & Architectural Takeaways](#24-summary--architectural-takeaways)
 
 ---
 
@@ -656,7 +658,99 @@ Without an automated regression test harness:
 
 ---
 
-## 22. Summary & Architectural Takeaways
+## 22. Challenge 21: Unified Webpage & Window Viewport Scrollbar Architecture
+
+### The Problem
+While inner card containers and data tables featured a custom, sleek 5px rounded scrollbar (`.custom-scrollbar`), the outer webpage window (`html` and `body` viewport) retained the default wide, blocky OS browser scrollbar (typically 16-17px wide with square thumb and contrasting track in Chromium, Edge, and Windows). This visual disparity created an unrefined look when scrolling long pages such as the Reports table or Analytics dashboard.
+
+### Technical Solution
+1. **Global Root Pseudo-Element Binding**:
+   Standardized `src/index.css` by attaching `::-webkit-scrollbar` directly to the document root alongside `.custom-scrollbar`:
+   ```css
+   ::-webkit-scrollbar,
+   .custom-scrollbar::-webkit-scrollbar {
+     width: 5px;
+     height: 5px;
+   }
+
+   ::-webkit-scrollbar-track,
+   .custom-scrollbar::-webkit-scrollbar-track {
+     background: transparent;
+   }
+
+   ::-webkit-scrollbar-thumb,
+   .custom-scrollbar::-webkit-scrollbar-thumb {
+     background: #cbd5e1;
+     border-radius: 9999px;
+   }
+
+   ::-webkit-scrollbar-thumb:hover,
+   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+     background: #94a3b8;
+   }
+   ```
+2. **Cross-Browser Firefox Parity**:
+   Extended W3C standard scrollbar properties across the root webpage and all containers:
+   ```css
+   html,
+   body,
+   *,
+   .custom-scrollbar {
+     scrollbar-width: thin;
+     scrollbar-color: #cbd5e1 transparent;
+   }
+   ```
+3. **Ergonomic & Visual Result**:
+   The entire browser window now features the exact same minimalist, elegant 5px rounded slate pill scrollbar as internal cards and tables, maintaining design consistency across the entire application viewport.
+
+---
+
+## 23. Challenge 22: Contextual Alert Notifications Architecture with Comprehensive Metadata Hierarchy
+
+### The Problem
+The notification popover in `TopNavbar.jsx` originally displayed generic mock event labels like `"Theft Alarm at Emergency Exit"` and `"Store 101 • Article #AR12345"`. Loss prevention staff required actionable inventory context directly in the alert dropdown:
+1. **Article Description as Primary Anchor**: Operators need to immediately recognize what product triggered the alarm (e.g. `"Men Slim Fit Denim Jeans"`), rather than an abstract room/exit label.
+2. **Explicit Article Numbering**: An unambiguous `Article No:` field with monospace formatting for quick lookup in inventory systems.
+3. **Store Code & Store Name Differentiation**: Explicit store identifiers (`HD55 - Dwarka` / `HD44 - Uttam - Nagar 2`) to distinguish multi-store incidents.
+4. **Precise Incident Time**: Clean time stamps (`14:22`, `14:08`) paired with a clock icon.
+
+### Technical Solution
+1. **Redesigned Notification Card Schema (`TopNavbar.jsx`)**:
+   - Structured notifications into dedicated data entities:
+     ```javascript
+     const NOTIFICATIONS = [
+       {
+         id: 1,
+         type: 'Theft',
+         articleDescription: 'Men Slim Fit Denim Jeans',
+         articleNo: 'ART-10492',
+         storeCode: 'HD55',
+         storeName: 'Dwarka',
+         time: '14:22',
+       },
+       {
+         id: 2,
+         type: 'Untagged',
+         articleDescription: 'Wireless Noise Cancelling Headphones',
+         articleNo: 'ART-20491',
+         storeCode: 'HD44',
+         storeName: 'Uttam - Nagar 2',
+         time: '14:08',
+       },
+     ];
+     ```
+2. **Hierarchical 3-Tier Layout Inside Each Notification**:
+   - **Row 1 (Primary Header)**: Left: `articleDescription` in bold slate-900 typography (`text-xs sm:text-[12.5px] font-bold`); Right: Security event badge (`Theft` in rose, `Untagged` in sky).
+   - **Row 2 (Article Identity)**: Monospace code chip: `Article No: ART-10492` in neutral slate styling.
+   - **Row 3 (Store Context & Timestamp)**: Left: Store icon with `[Store Code] - [Store Name]`; Right: Clock icon with incident `time`.
+3. **Responsive Popover Width**:
+   - Expanded popover container to `w-84 sm:w-96` with `border border-slate-100/90` cards to eliminate text clipping.
+4. **Automated Test Coverage**:
+   - Enhanced `src/__tests__/layout/TopNavbar.test.jsx` to verify all five metadata fields render accurately upon opening the bell dropdown.
+
+---
+
+## 24. Summary & Architectural Takeaways
 
 | Feature / Area | Initial Challenge | Final Solution | Architectural Benefit |
 | :--- | :--- | :--- | :--- |
@@ -681,6 +775,8 @@ Without an automated regression test harness:
 | **Visual Aesthetics** | Generic flat panels without identity | Dual-tone 2px borders, themed gradient headers, live ping dots | Distinct, cohesive security-themed design system |
 | **Data Integrity** | Unformatted amounts, trailing hyphens, copy clutter | Indian currency formatting, conditional strings, clean chips | High operational trust and zero UI glitches |
 | **Test Automation Suite** | Zero automated tests; risk of regressions in 20 components | Vitest + React Testing Library + JSDOM suite across all 20 components + App root | 100% green tests (21/21 files, 67/67 tests), 0 linter errors, production build verified |
+| **Webpage Scrollbar** | Main window had default wide, blocky OS scrollbar | Global `::-webkit-scrollbar` & W3C `thin` applied to `html`, `body` | Seamless visual parity between webpage and interior cards |
+| **Alert Notifications** | Generic abstract labels without actionable product details | Article description as main title, Article No, Store Code & Name, Time | Instant, actionable incident context directly from top navbar |
 
 
 
