@@ -2,14 +2,7 @@ import React, { useState } from 'react';
 import { PieChart as PieIcon, Tag, TagX, AlertTriangle, TrendingDown } from 'lucide-react';
 import { TAG_STATUS_DATA, STATCARD_METRICS } from '../../data/mockAnalyticsData';
 
-/**
- * TagStatusDistributionChart Component
- * Renders a true 3D Isometric Extruded Pie Chart displaying the exact StatCard metrics from Image 2:
- * - Total Tags (12,568 · 95.3%)
- * - Untagged (315 · 2.5%)
- * - Theft Alerts (280 · 2.2%)
- * - Potential Loss (₹4,23,010 shown only at the bottom)
- */
+
 export default function TagStatusDistributionChart({
   data = TAG_STATUS_DATA,
   className = '',

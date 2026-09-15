@@ -308,9 +308,6 @@ const ReportsView = () => {
               <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                 Loss Prevention & Goods Security
               </h1>
-              <p className="text-xs text-slate-600 font-medium">
-                Store Security Incidents & Shrinkage Audit Log
-              </p>
             </div>
             <div className="text-right text-xs text-slate-600 space-y-0.5">
               <p>
@@ -478,14 +475,6 @@ const ReportsView = () => {
                             <span>Save to PDF / Print</span>
                             <span className="text-[10px] text-slate-400 font-normal">Prints table only</span>
                           </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={exportToJSON}
-                          className="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors cursor-pointer"
-                        >
-                          <FileText className="w-4 h-4 text-purple-600 shrink-0" />
-                          <span>JSON Data (.json)</span>
                         </button>
                       </div>
                     )}
